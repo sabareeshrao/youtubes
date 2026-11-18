@@ -1,0 +1,31 @@
+name: Restore original standalone UPSC template files
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'fragments/**'
+      - 'scripts/rebuild_templates.py'
+      - '.github/workflows/rebuild-templates.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Restore templates and verify artwork byte integrity
+        run: python3 scripts/rebuild_templates.py
+      - name: Commit original standalone HTML files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Cream_Slide_Cards_Starter_UPDATED.html Illustrated_Textbook_Starter_UPDATED.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'Restore complete original HTML templates'
+            git push
+          fi
